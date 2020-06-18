@@ -1,3 +1,14 @@
-body {
-  background-color: red;
+.game-board {
+  display: grid;
+  grid-template-rows: repeat(4, 100px);
+  grid-template-columns: repeat(4, 100px);
+  column-gap: 2px;
+  row-gap: 2px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid 1px;
 }
