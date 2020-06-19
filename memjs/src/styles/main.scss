@@ -11,4 +11,9 @@
   align-items: center;
   justify-content: center;
   border: solid 1px;
+  background-color: red;
+
+  &.flipped {
+    background-color: blue;
+  }
 }
