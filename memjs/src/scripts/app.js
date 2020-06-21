@@ -1,59 +1,30 @@
-class MatchArray {
-  constructor() {
-    this.array = [];
-  }
+import CardItem from "./components/CardItem";
+import MatchArray from "./components/MatchArray";
 
-  add(cardItem) {
-    if (this.array.length >= 0 && this.array.length < 2) {
-      this.array.push(cardItem);
-    }
-  }
-
-  remove({ id }) {
-    this.array = this.array.filter((item) => item.id !== id);
-  }
-
-  clear() {
-    this.array = [];
-  }
-
-  isFull() {
-    return this.array.length === 2;
-  }
-
-  isMatch() {
-    if (this.isFull()) {
-      const [item1, item2] = this.array;
-      return item1.id !== item2.id && item1.value === item2.value;
-    } else {
-      return false;
-    }
-  }
-}
-
-class CardItem {
-  constructor(id, value) {
-    this.id = id;
-    this.value = value;
+class GameCard {
+  constructor(options = {}) {
+    this.id = null;
+    this.value = null;
+    this.active = false;
     this.flipped = false;
-    this.template = document.createElement("div");
     this.listener = null;
-  }
-
-  activate(onFlipCb) {
-    this.template.classList.add("card");
-    this.listener = () => {
-      this.template.classList.toggle("flipped");
-      this.flipped = !this.flipped;
-      if (onFlipCb) onFlipCb();
+    this.template = document.createElement("div");
+    this.style = {
+      baseClassName: "card",
+      backClassName: "back-face",
+      frontClassName: "front-face",
     };
-    this.template.addEventListener("click", this.listener);
   }
 
-  deactivate() {
-    this.template.removeEventListener("click", this.listener);
+  initialize() {
+    const { baseClassName, backClassName } = this.style;
+    this.template.classList.add(baseClassName, backClassName);
   }
 }
+
+const gameCard = new GameCard();
+gameCard.initialize();
+console.log(gameCard);
 
 export default function () {
   // 0 - configure the cards
@@ -78,6 +49,7 @@ export default function () {
 
   // 0 - initialize the match array
   let scores = 0;
+  document.querySelector("#scores").innerHTML = scores;
 
   // 0 - initialize the match array
   const matchArray = new MatchArray();
@@ -85,36 +57,42 @@ export default function () {
   // 0 - initialize the game board
   const gameBoard = document.querySelector("#game-board");
 
-  cards.forEach((card, index) => {
-    const newCard = new CardItem(index, card.value);
-    newCard.activate(() => {
-      newCard.flipped ? matchArray.add(newCard) : matchArray.remove(newCard);
+  const storeForMatch = (carditem) => {
+    carditem.flipped ? matchArray.add(carditem) : matchArray.remove(carditem);
+  };
+
+  const isMatch = () => {
+    if (matchArray.isFull()) {
       if (matchArray.isMatch()) {
-        scores++;
+        // scores++;
         matchArray.array.forEach((card) => card.deactivate());
         matchArray.clear();
+        return true;
+      } else {
+        setTimeout(() => {
+          matchArray.array.forEach((card) => card.reset());
+          matchArray.clear();
+        }, 500);
+        return false;
       }
-      // if is not match
-      // reflip the cards and empty the matcharray
+    }
+  };
+
+  cards.forEach((card, index) => {
+    const newCard = new CardItem(index, card.value);
+    newCard.configure().activate(() => {
+      // add selected
+      storeForMatch(newCard);
+      // check for match
+      if (isMatch()) {
+        // update scores
+        document.querySelector("#scores").innerHTML = ++scores;
+      }
+      // check for win
+      if (scores === 8) {
+        alert("You did it!");
+      }
     });
     gameBoard.appendChild(newCard.template);
   });
-
-  // 1 - on loaded populate the gameboard with game cards
-  // 2 - on card click
-  //      flip the card
-  //      store the card value into the match array
-  //      if match array length === 2 check for match
-  //        if match
-  //          increase scores (max 8)
-  //          if score === 8
-  //            you win
-  //          else
-  //            remove event listener from cards
-  //            clear the match array
-  //        else
-  //          reflip the cards
-  //          clear the match array
-  //      else
-  //        keep going
 }

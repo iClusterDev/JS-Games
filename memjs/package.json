@@ -33,7 +33,8 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "normalize-scss": "^7.0.1"
+    "normalize-scss": "^7.0.1",
+    "typeis.js": "^1.0.18"
   },
   "browserslist": [
     "last 2 versions",
